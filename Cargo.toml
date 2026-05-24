@@ -1,0 +1,19 @@
+[package]
+name = "prompt-cache-warmer"
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.74"
+description = "Pre-warm Anthropic prompt cache before user traffic. Injects cache_control breakpoints, fires a tiny warmup call, optionally verifies the cache hit, and reports tokens, latency, and estimated cost. No SDK dependency."
+authors = ["Mukunda Rao Katta <mukunda.vjcs6@gmail.com>"]
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/MukundaKatta/prompt-cache-warmer-rs"
+homepage = "https://github.com/MukundaKatta/prompt-cache-warmer-rs"
+documentation = "https://docs.rs/prompt-cache-warmer"
+readme = "README.md"
+keywords = ["anthropic", "claude", "llm", "prompt-cache", "cost"]
+categories = ["api-bindings", "caching"]
+exclude = [".github/*", "target/*"]
+
+[dependencies]
+
+[dev-dependencies]

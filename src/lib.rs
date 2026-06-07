@@ -252,15 +252,15 @@ pub fn default_prices() -> PriceTable {
     t.insert(
         "claude-opus-4-7",
         ModelPrice {
-            input: 15.0,
-            output: 75.0,
+            input: 5.0,
+            output: 25.0,
         },
     );
     t.insert(
         "claude-opus-4-6",
         ModelPrice {
-            input: 15.0,
-            output: 75.0,
+            input: 5.0,
+            output: 25.0,
         },
     );
     t.insert(
@@ -273,8 +273,8 @@ pub fn default_prices() -> PriceTable {
     t.insert(
         "claude-haiku-4-5",
         ModelPrice {
-            input: 0.80,
-            output: 4.0,
+            input: 1.0,
+            output: 5.0,
         },
     );
     t

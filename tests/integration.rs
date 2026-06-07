@@ -87,10 +87,7 @@ fn add_cache_breakpoints_default_marks_last_only() {
 fn add_cache_breakpoints_caps_at_four() {
     let blocks: Vec<Block> = (0..10).map(|i| Block::from(format!("b{i}"))).collect();
     let out = add_cache_breakpoints(&blocks, 99);
-    let marked = out
-        .iter()
-        .filter(|b| b.cache_control.is_some())
-        .count();
+    let marked = out.iter().filter(|b| b.cache_control.is_some()).count();
     assert_eq!(marked, 4);
 }
 
@@ -113,6 +110,21 @@ fn add_cache_breakpoints_preserves_existing_marker() {
 fn add_cache_breakpoints_empty_input() {
     let out = add_cache_breakpoints(&[], 3);
     assert!(out.is_empty());
+}
+
+#[test]
+fn add_cache_breakpoints_spreads_and_ends_on_last() {
+    // 8 blocks, 3 breakpoints: evenly spaced, last block always marked.
+    let blocks: Vec<Block> = (0..8).map(|i| Block::from(format!("b{i}"))).collect();
+    let out = add_cache_breakpoints(&blocks, 3);
+    let marked: Vec<usize> = out
+        .iter()
+        .enumerate()
+        .filter(|(_, b)| b.cache_control.is_some())
+        .map(|(i, _)| i)
+        .collect();
+    assert_eq!(marked.len(), 3);
+    assert_eq!(*marked.last().unwrap(), out.len() - 1);
 }
 
 // ---- Warmer::warm ----------------------------------------------------------
@@ -203,9 +215,24 @@ fn cost_estimate_with_default_prices() {
         cache_read_input_tokens: 0,
     }]));
     let out = warmer.warm("claude-opus-4-7", "x").unwrap();
-    // 1M write * $15/M * 1.25 = $18.75, + 10 out * $75/M ~= 0.00075.
+    // 1M write * $5/M * 1.25 = $6.25, + 10 out * $25/M ~= 0.00025.
     let cost = out.cost_usd.expect("cost present for known model");
-    assert!((18.70..=18.80).contains(&cost), "got {cost}");
+    assert!((6.20..=6.30).contains(&cost), "got {cost}");
+}
+
+#[test]
+fn cost_estimate_combines_regular_read_and_output() {
+    // Sonnet 4.6: input $3/M, output $15/M. Multipliers: read 0.10x.
+    let warmer = Warmer::new(FakeClient::new(vec![Usage {
+        input_tokens: 1_000_000,
+        output_tokens: 1_000_000,
+        cache_creation_input_tokens: 0,
+        cache_read_input_tokens: 1_000_000,
+    }]));
+    let out = warmer.warm("claude-sonnet-4-6", "x").unwrap();
+    // regular: 1M * $3/M = 3.0; read: 1M * $3/M * 0.10 = 0.3; out: 1M * $15/M = 15.0.
+    let cost = out.cost_usd.expect("cost present for known model");
+    assert!((18.25..=18.35).contains(&cost), "got {cost}");
 }
 
 #[test]
